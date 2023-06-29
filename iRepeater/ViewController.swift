@@ -12,6 +12,7 @@ import MobileCoreServices
 
 class ViewController: UIViewController {
     
+    var currentFileName = ""
     var currentFile: [[String: Any]] = []
 //    [ // test data
 //        ["orig": "wink", "trans":"", "addinfo":""],
@@ -28,29 +29,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var addInfo: UITextView!
     @IBOutlet weak var chooseBtn: UIButton!
     
+    @IBOutlet weak var progressBar: UIProgressView!
     @IBAction func chooseFileOnTap(_ sender: Any) {
 //        print("choose")
         presentFilePicker()
-    }
-    
-    fileprivate func onTerm() {
-        print("count \(count)")
-        let term = currentFile[count]
-        if (isDirect) {
-            origText.text = term["orig"] as? String
-            transText.text = ""
-        } else {
-            origText.text = ""
-            transText.text = term["trans"] as? String
-        }
-        addInfo.text = ""
-        
-        let str = getPronunciationServiceUrl(word: (term["orig"] as? String)!)
-//        let url = NSURL(string: str)
-        let url = URL(string: str)
-        print(str)
-//        downloadFileFromURL(url: url!)
-        playAudioFromURL(url: url!)
     }
     
     func playAudioFromURL(url: URL) {
@@ -76,8 +58,11 @@ class ViewController: UIViewController {
         }
         if (count == currentFile.count - 1) {
             count = -1
+            progressBar.progress = 0
+            currentFile.shuffle()
         }
         count += 1
+        progressBar.progress += 1.0 / Float(currentFile.count)
         onTerm()
     }
     
@@ -87,17 +72,41 @@ class ViewController: UIViewController {
         }
         if (count <= 0) {
             count = currentFile.count
+            progressBar.progress = 1
+            currentFile.shuffle()
         }
         count -= 1
+        progressBar.progress -= 1.0 / Float(currentFile.count)
         onTerm()
     }
+    
+    fileprivate func onTerm() {
+        print("count \(count)")
+        let term = currentFile[count]
+        if (isDirect) {
+            origText.text = term["orig"] as? String
+            transText.text = ""
+        } else {
+            origText.text = ""
+            transText.text = term["trans"] as? String
+        }
+        addInfo.text = ""
+        
+        let str = getPronunciationServiceUrl(word: (term["orig"] as? String)!)
+//        let url = NSURL(string: str)
+        let url = URL(string: str)
+        print(str)
+//        downloadFileFromURL(url: url!)
+        playAudioFromURL(url: url!)
+    }
+    
    
     @IBAction func switchLang(_ sender: Any) {
         isDirect = !isDirect
         if (isDirect) {
-            stateLabel.text = "Eng -> Rus"
+            stateLabel.text = "Eng -> Rus | " + currentFileName
         } else {
-            stateLabel.text = "Rus -> Eng"
+            stateLabel.text = "Rus -> Eng | " + currentFileName
         }
     }
     
@@ -128,7 +137,7 @@ class ViewController: UIViewController {
             if let fileContents = String(data: fileData, encoding: .utf8) {
                 // Use the file contents as needed
 //                print("File contents:\n\(fileContents)")
-                jsonStringToJSON(fileContents)
+                jsonStringToJSON(fileContents, url)
             }
         } catch {
             // Handle any errors that occur while reading the file
@@ -136,7 +145,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func jsonStringToJSON(_ jsonString: String) {
+    func jsonStringToJSON(_ jsonString: String, _ fileURL: URL) {
         if let jsonData = jsonString.data(using: .utf8) {
             do {
                 let json = try JSONSerialization.jsonObject(with: jsonData, options: [])
@@ -145,8 +154,14 @@ class ViewController: UIViewController {
 //                print(isValid)
                 if let jsonObject = json as? [[String: Any]] {
                     // Access the JSON properties as needed
-                    currentFile = jsonObject
+                    currentFile = jsonObject.shuffled()
 //                    print("JSON object:\n\(jsonObject)")
+                    currentFileName = String(fileURL.lastPathComponent.prefix(10))
+                    if (isDirect) {
+                        stateLabel.text = "Eng -> Rus | " + currentFileName
+                    } else {
+                        stateLabel.text = "Rus -> Eng | " + currentFileName
+                    }
                 }
             } catch {
                 // Handle any errors that occur during JSON serialization
@@ -194,9 +209,9 @@ extension ViewController: UIDocumentPickerDelegate {
         }
         // Access the selected file URL and perform the desired operations
 //        print("Selected File URL: \(fileURL)")
-        readFile(at: fileURL)
-        let name: String = String(fileURL.lastPathComponent.prefix(10))
-        chooseBtn.subtitleLabel?.text = name
+        if (fileURL.pathExtension == "json") {
+            readFile(at: fileURL)
+        }
     }
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
