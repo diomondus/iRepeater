@@ -13,13 +13,13 @@ import MobileCoreServices
 class ViewController: UIViewController {
     
     var currentFileName = ""
-    var currentFile: [[String: Any]] = []
-//    [ // test data
-//        ["orig": "wink", "trans":"", "addinfo":""],
-//        ["orig": "lodge", "trans":"", "addinfo":""],
-//        ["orig": "clarify", "trans":"", "addinfo":""],
-//        ["orig": "brass", "trans":"", "addinfo":""],
-//    ]
+    var currentFile: [[String: Any]] = //[]
+    [ // test data
+        ["orig": "wink", "trans":"", "addinfo":""],
+        ["orig": "(at) lodge", "trans":"", "addinfo":""],
+        ["orig": "clarify (for)", "trans":"", "addinfo":""],
+        ["orig": "brass wink", "trans":"", "addinfo":""],
+    ]
     var count = -1
     var isDirect = true
 
@@ -36,12 +36,13 @@ class ViewController: UIViewController {
     }
     
     func playAudioFromURL(url: URL) {
+//        print(url)
         DispatchQueue.global().async {
             do {
                 let data = try Data(contentsOf: url)
                 let player = try AVAudioPlayer(data: data)
                 player.play()
-                sleep(1) // yebanie pidarasi iz epol
+                sleep(2) // yebanie pidarasi iz epol
             } catch {
                 print("Error playing audio: \(error.localizedDescription)")
             }
@@ -49,6 +50,7 @@ class ViewController: UIViewController {
     }
     
     func getPronunciationServiceUrl(word: String) -> String {
+//        print(word)
         return "https://ssl.gstatic.com/dictionary/static/pronunciation/2022-03-02/audio/\(word.prefix(2))/\(word)_en_us_1.mp3"
     }
     
@@ -83,8 +85,9 @@ class ViewController: UIViewController {
     fileprivate func onTerm() {
         print("count \(count)")
         let term = currentFile[count]
+        let orig = term["orig"] as! String
         if (isDirect) {
-            origText.text = term["orig"] as? String
+            origText.text = orig
             transText.text = ""
         } else {
             origText.text = ""
@@ -92,12 +95,10 @@ class ViewController: UIViewController {
         }
         addInfo.text = ""
         
-        let str = getPronunciationServiceUrl(word: (term["orig"] as? String)!)
-//        let url = NSURL(string: str)
-        let url = URL(string: str)
-        print(str)
-//        downloadFileFromURL(url: url!)
-        playAudioFromURL(url: url!)
+        orig.split(separator: " ")
+            .filter { word in word.count > 2 && !word.contains("(") && !word.contains(")") }
+            .map { word in URL(string: getPronunciationServiceUrl(word: String(word)))!}
+            .forEach { url in playAudioFromURL(url: url)}
     }
     
    
