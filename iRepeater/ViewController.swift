@@ -12,15 +12,14 @@ import MobileCoreServices
 
 class ViewController: UIViewController {
     
-    var currentFileName = ""
     var currentFile: [[String: Any]] = //[]
     [ // test data
-        ["orig": "wink", "trans":"", "addinfo":""],
-        ["orig": "(at) lodge", "trans":"", "addinfo":""],
-        ["orig": "clarify (for)", "trans":"", "addinfo":""],
-        ["orig": "brass wink", "trans":"", "addinfo":""],
+        ["orig": "wink", "trans":"тест1", "addinfo":"eg1"],
+        ["orig": "(at) lodge", "trans":"тест2", "addinfo":"eg2"],
+        ["orig": "clarify (for)", "trans":"тест3", "addinfo":"eg3"],
+        ["orig": "brass wink", "trans":"тест4", "addinfo":"eg4"],
     ]
-    var count = -1
+    var position = -1
     var isDirect = true
 
     @IBOutlet weak var stateLabel: UILabel!
@@ -28,6 +27,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var transText: UITextField!
     @IBOutlet weak var addInfo: UITextView!
     @IBOutlet weak var chooseBtn: UIButton!
+    @IBOutlet weak var switchDirectionButton: UIButton!
     
     @IBOutlet weak var progressBar: UIProgressView!
     @IBAction func chooseFileOnTap(_ sender: Any) {
@@ -58,13 +58,16 @@ class ViewController: UIViewController {
         if (currentFile.isEmpty) {
             return
         }
-        if (count == currentFile.count - 1) {
-            count = -1
+        if (position == currentFile.count - 1) {
+            position = -1
             progressBar.progress = 0
             currentFile.shuffle()
         }
-        count += 1
+        position += 1
         progressBar.progress += 1.0 / Float(currentFile.count)
+        if (position > 0) {
+            playSentence(currentFile[position - 1]["orig"] as! String)
+        }
         onTerm()
     }
     
@@ -72,42 +75,48 @@ class ViewController: UIViewController {
         if (currentFile.isEmpty) {
             return
         }
-        if (count <= 0) {
-            count = currentFile.count
+        if (position <= 0) {
+            position = currentFile.count
             progressBar.progress = 1
             currentFile.shuffle()
         }
-        count -= 1
+        position -= 1
         progressBar.progress -= 1.0 / Float(currentFile.count)
+        if (position < currentFile.count - 1) {
+            playSentence(currentFile[position + 1]["orig"] as! String)
+        }
         onTerm()
     }
     
     fileprivate func onTerm() {
-        print("count \(count)")
-        let term = currentFile[count]
-        let orig = term["orig"] as! String
+//        print("count \(count)")
+//        print("direction: \(isDirect ? "straight": "reversed")")
+        let term = currentFile[position]
         if (isDirect) {
+            let orig = term["orig"] as! String
             origText.text = orig
             transText.text = ""
         } else {
+            let trans = term["trans"] as! String
             origText.text = ""
-            transText.text = term["trans"] as? String
+            transText.text = trans
         }
         addInfo.text = ""
-        
+    }
+    
+    fileprivate func playSentence(_ orig: String) {
         orig.split(separator: " ")
             .filter { word in word.count > 2 && !word.contains("(") && !word.contains(")") }
             .map { word in URL(string: getPronunciationServiceUrl(word: String(word)))!}
             .forEach { url in playAudioFromURL(url: url)}
     }
     
-   
     @IBAction func switchLang(_ sender: Any) {
         isDirect = !isDirect
         if (isDirect) {
-            stateLabel.text = "Eng -> Rus | " + currentFileName
+            switchDirectionButton.setTitle("EN→RU", for: .normal)
         } else {
-            stateLabel.text = "Rus -> Eng | " + currentFileName
+            switchDirectionButton.setTitle("RU→EN", for: .normal)
         }
     }
     
@@ -115,7 +124,7 @@ class ViewController: UIViewController {
         if (currentFile.isEmpty) {
             return
         }
-        let term = currentFile[count]
+        let term = currentFile[position]
         if (!isDirect) {
             origText.text = term["orig"] as? String
         } else {
@@ -157,12 +166,7 @@ class ViewController: UIViewController {
                     // Access the JSON properties as needed
                     currentFile = jsonObject.shuffled()
 //                    print("JSON object:\n\(jsonObject)")
-                    currentFileName = String(fileURL.lastPathComponent.prefix(10))
-                    if (isDirect) {
-                        stateLabel.text = "Eng -> Rus | " + currentFileName
-                    } else {
-                        stateLabel.text = "Rus -> Eng | " + currentFileName
-                    }
+                    stateLabel.text = String(fileURL.lastPathComponent.prefix(10))
                 }
             } catch {
                 // Handle any errors that occur during JSON serialization
@@ -196,10 +200,24 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        origText.isEnabled = false
-        transText.isEnabled = false
-        addInfo.isEditable = false
-//        print("Repeater!")
+        setupTouchOverlay()
+    }
+    
+    func setupTouchOverlay() {
+        // Create a transparent view with the same frame as the disabled text field
+        let touchOverlayView = UIView(frame: origText.frame)
+        view.addSubview(touchOverlayView)
+
+        // Add a tap gesture recognizer to the overlay view
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        touchOverlayView.addGestureRecognizer(tapGesture)
+    }
+
+    @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+//        print("Touched the disabled text field overlay")
+        if (origText.text != nil && !origText.text!.isEmpty) {
+            playSentence(origText.text!)
+        }
     }
 }
 
