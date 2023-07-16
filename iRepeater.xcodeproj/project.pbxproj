@@ -17,6 +17,7 @@
 		B4321C892A49F0C30012C049 /* iRepeaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4321C882A49F0C30012C049 /* iRepeaterTests.swift */; };
 		B4321C932A49F0C30012C049 /* iRepeaterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4321C922A49F0C30012C049 /* iRepeaterUITests.swift */; };
 		B4321C952A49F0C30012C049 /* iRepeaterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4321C942A49F0C30012C049 /* iRepeaterUITestsLaunchTests.swift */; };
+		B48BAC6F2A6470360060E8DD /* AudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48BAC6E2A6470360060E8DD /* AudioService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		B4321C8E2A49F0C30012C049 /* iRepeaterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iRepeaterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4321C922A49F0C30012C049 /* iRepeaterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iRepeaterUITests.swift; sourceTree = "<group>"; };
 		B4321C942A49F0C30012C049 /* iRepeaterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iRepeaterUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		B48BAC6E2A6470360060E8DD /* AudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 				B4321C6E2A49F0C10012C049 /* AppDelegate.swift */,
 				B4321C702A49F0C10012C049 /* SceneDelegate.swift */,
 				B4321C722A49F0C10012C049 /* ViewController.swift */,
+				B48BAC6E2A6470360060E8DD /* AudioService.swift */,
 				B4321C742A49F0C10012C049 /* Main.storyboard */,
 				B4321C7A2A49F0C30012C049 /* Assets.xcassets */,
 				B4321C7C2A49F0C30012C049 /* LaunchScreen.storyboard */,
@@ -261,6 +264,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B48BAC6F2A6470360060E8DD /* AudioService.swift in Sources */,
 				B4321C732A49F0C10012C049 /* ViewController.swift in Sources */,
 				B4321C6F2A49F0C10012C049 /* AppDelegate.swift in Sources */,
 				B4321C712A49F0C10012C049 /* SceneDelegate.swift in Sources */,

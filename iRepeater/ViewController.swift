@@ -6,11 +6,12 @@
 //
 
 import UIKit
-import AVFoundation
 import UniformTypeIdentifiers
 import MobileCoreServices
 
 class ViewController: UIViewController {
+    
+    let audioService = AudioService()
     
     var currentFile: [[String: Any]] = //[]
     [ // test data
@@ -35,25 +36,6 @@ class ViewController: UIViewController {
         presentFilePicker()
     }
     
-    func playAudioFromURL(url: URL) {
-//        print(url)
-        DispatchQueue.global().async {
-            do {
-                let data = try Data(contentsOf: url)
-                let player = try AVAudioPlayer(data: data)
-                player.play()
-                sleep(2) // yebanie pidarasi iz epol
-            } catch {
-                print("Error playing audio: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    func getPronunciationServiceUrl(word: String) -> String {
-//        print(word)
-        return "https://ssl.gstatic.com/dictionary/static/pronunciation/2022-03-02/audio/\(word.prefix(2))/\(word)_en_us_1.mp3"
-    }
-    
     @IBAction func onNext(_ sender: Any) {
         if (currentFile.isEmpty) {
             return
@@ -66,7 +48,7 @@ class ViewController: UIViewController {
         position += 1
         progressBar.progress += 1.0 / Float(currentFile.count)
         if (position > 0) {
-            playSentence(currentFile[position - 1]["orig"] as! String)
+            audioService.playSentence(currentFile[position - 1]["orig"] as! String)
         }
         onTerm()
     }
@@ -83,7 +65,7 @@ class ViewController: UIViewController {
         position -= 1
         progressBar.progress -= 1.0 / Float(currentFile.count)
         if (position < currentFile.count - 1) {
-            playSentence(currentFile[position + 1]["orig"] as! String)
+            audioService.playSentence(currentFile[position + 1]["orig"] as! String)
         }
         onTerm()
     }
@@ -102,13 +84,6 @@ class ViewController: UIViewController {
             transText.text = trans
         }
         addInfo.text = ""
-    }
-    
-    fileprivate func playSentence(_ orig: String) {
-        orig.split(separator: " ")
-            .filter { word in word.count > 2 && !word.contains("(") && !word.contains(")") }
-            .map { word in URL(string: getPronunciationServiceUrl(word: String(word)))!}
-            .forEach { url in playAudioFromURL(url: url)}
     }
     
     @IBAction func switchLang(_ sender: Any) {
@@ -167,6 +142,7 @@ class ViewController: UIViewController {
                     currentFile = jsonObject.shuffled()
 //                    print("JSON object:\n\(jsonObject)")
                     stateLabel.text = String(fileURL.lastPathComponent.prefix(10))
+                    progressBar.progress = 0
                 }
             } catch {
                 // Handle any errors that occur during JSON serialization
@@ -216,7 +192,7 @@ class ViewController: UIViewController {
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
 //        print("Touched the disabled text field overlay")
         if (origText.text != nil && !origText.text!.isEmpty) {
-            playSentence(origText.text!)
+            audioService.playSentence(origText.text!)
         }
     }
 }
