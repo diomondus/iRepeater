@@ -25,7 +25,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var stateLabel: UILabel!
     @IBOutlet weak var origText: UITextField!
-    @IBOutlet weak var transText: UITextField!
+    @IBOutlet weak var transText: UITextView!
     @IBOutlet weak var addInfo: UITextView!
     @IBOutlet weak var chooseBtn: UIButton!
     @IBOutlet weak var switchDirectionButton: UIButton!
