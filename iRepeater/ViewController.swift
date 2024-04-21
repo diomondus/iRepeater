@@ -81,10 +81,15 @@ class ViewController: UIViewController {
         } else {
             let trans = term["trans"] as! String
             origText.text = ""
-            transText.text = trans
+            transText.text = shuffle(trans)
+
         }
         addInfo.text = ""
         counter.text = "\(currentFile.count - position - 1)"
+    }
+    
+    fileprivate func shuffle(_ translations: String) -> String {
+        return translations.components(separatedBy: ", ").shuffled().joined(separator: ", ")
     }
     
     @IBAction func switchLang(_ sender: Any) {
