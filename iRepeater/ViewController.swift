@@ -28,8 +28,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var transText: UITextView!
     @IBOutlet weak var addInfo: UITextView!
     @IBOutlet weak var chooseBtn: UIButton!
+    @IBOutlet weak var counter: UILabel!
     @IBOutlet weak var switchDirectionButton: UIButton!
-    
     @IBOutlet weak var progressBar: UIProgressView!
     @IBAction func chooseFileOnTap(_ sender: Any) {
 //        print("choose")
@@ -84,6 +84,7 @@ class ViewController: UIViewController {
             transText.text = trans
         }
         addInfo.text = ""
+        counter.text = "\(currentFile.count - position - 1)"
     }
     
     @IBAction func switchLang(_ sender: Any) {
@@ -134,15 +135,18 @@ class ViewController: UIViewController {
         if let jsonData = jsonString.data(using: .utf8) {
             do {
                 let json = try JSONSerialization.jsonObject(with: jsonData, options: [])
-                // Process the JSON object
 //                let isValid = JSONSerialization.isValidJSONObject(json)
 //                print(isValid)
                 if let jsonObject = json as? [[String: Any]] {
-                    // Access the JSON properties as needed
                     currentFile = jsonObject.shuffled()
-//                    print("JSON object:\n\(jsonObject)")
+                    // print("JSON object:\n\(jsonObject)")
                     stateLabel.text = String(fileURL.lastPathComponent.prefix(10))
                     progressBar.progress = 0
+                    position = -1
+                    origText.text = ""
+                    transText.text = ""
+                    addInfo.text = ""
+                    counter.text = "\(currentFile.count)"
                 }
             } catch {
                 // Handle any errors that occur during JSON serialization
